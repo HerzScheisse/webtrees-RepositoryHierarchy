@@ -55,6 +55,8 @@ class DeleteSourceCitation implements RequestHandlerInterface
         $xref_type = Validator::queryParams($request)->string('xref_type');
         $gedcom    = Validator::queryParams($request)->string('gedcom');
 
+		//User access to tree is handled by $fact->canEdit(), see code below
+
         $module_service = new ModuleService();
         $linked_record_service = new LinkedRecordService();
         $individual_facts_service = new IndividualFactsService($linked_record_service, $module_service);

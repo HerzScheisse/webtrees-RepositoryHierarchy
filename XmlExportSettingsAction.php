@@ -60,11 +60,16 @@ class XmlExportSettingsAction implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $tree               = Validator::attributes($request)->tree();
-        $user               = Validator::attributes($request)->user();
-        $repository_xref    = Validator::attributes($request)->string('xref');
-        $command            = Validator::attributes($request)->string('command');
-        $params             = (array) $request->getQueryParams();
+        $tree            = Validator::attributes($request)->tree();
+        $user            = Validator::attributes($request)->user();
+        $repository_xref = Validator::attributes($request)->string('xref');
+        $command         = Validator::attributes($request)->string('command');
+        $params          = (array) $request->getQueryParams();
+
+		//If user does not have access
+        if (Auth::accessLevel($tree, $user) === Auth::PRIV_PRIVATE) {
+            return response();
+		}
 
         $admin_user_id = RepositoryHierarchy::ADMIN_USER_STRING;
         $repository_hierarchy = $this->module_service->findByName(RepositoryHierarchy::activeModuleName());

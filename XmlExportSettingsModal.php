@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\RepositoryHierarchy;
 
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Localization\Locale;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\I18N;
@@ -138,12 +139,17 @@ class XmlExportSettingsModal implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $tree                   = Validator::attributes($request)->tree();
-        $user                   = Validator::attributes($request)->user();
-        $repository_xref        = Validator::attributes($request)->string('xref');
-        $command                = Validator::attributes($request)->string('command');
-        $delimiter_expression   = Validator::queryParams($request)->string('delimiter_expression');
+        $tree                 = Validator::attributes($request)->tree();
+        $user                 = Validator::attributes($request)->user();
+        $repository_xref      = Validator::attributes($request)->string('xref');
+        $command              = Validator::attributes($request)->string('command');
+        $delimiter_expression = Validator::queryParams($request)->string('delimiter_expression');
 
+		//If user does not have access
+        if (Auth::accessLevel($tree, $user) === Auth::PRIV_PRIVATE) {
+            return response();
+		}
+		
         $repository_hierarchy = $this->module_service->findByName(RepositoryHierarchy::activeModuleName());
         $repository = Registry::repositoryFactory()->make($repository_xref, $tree);
 

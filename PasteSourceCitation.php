@@ -51,6 +51,8 @@ class PasteSourceCitation implements RequestHandlerInterface
         $xref    = Validator::attributes($request)->isXref()->string('xref');
         $fact_id = Validator::attributes($request)->string('fact_id');
 
+		//User access to tree is handled by $fact->canEdit(), see code below
+
         $record = Registry::gedcomRecordFactory()->make($xref, $tree);
         $record = Auth::checkRecordAccess($record, true);
 

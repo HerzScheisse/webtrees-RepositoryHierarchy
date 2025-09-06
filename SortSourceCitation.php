@@ -57,6 +57,8 @@ class SortSourceCitation implements RequestHandlerInterface
         $old_position      = Validator::queryParams($request)->integer('old_position', 1);
         $new_position      = Validator::queryParams($request)->integer('new_position', 1);
 
+		//User access to tree is handled by $fact->canEdit(), see code below
+
         $module_service = new ModuleService();
         $linked_record_service = new LinkedRecordService();
         $individual_facts_service = new IndividualFactsService($linked_record_service, $module_service);

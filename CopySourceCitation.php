@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\RepositoryHierarchy;
 
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Session;
@@ -48,7 +49,14 @@ class CopySourceCitation implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $tree    = Validator::attributes($request)->tree();
+		$user    = Validator::attributes($request)->user();
         $gedcom  = Validator::queryParams($request)->string('gedcom', '');
+
+		//If user does not have access to the tree
+        if (Auth::accessLevel($tree, $user) === Auth::PRIV_PRIVATE) {
+            FlashMessages::addMessage(I18N::translate('Access denied'));
+            return response();
+        }
 
         //Save received GEDCOM to session
         Session::put(RepositoryHierarchy::activeModuleName() . RepositoryHierarchy::PREF_CITATION_GEDCOM . '_' . $tree->id(), $gedcom);

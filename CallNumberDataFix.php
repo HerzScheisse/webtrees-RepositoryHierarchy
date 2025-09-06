@@ -25,12 +25,11 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\RepositoryHierarchy;
 
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Http\RequestHandlers\PendingChanges;
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
-use Fisharebest\Webtrees\Module\ModuleDataFixInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -67,44 +66,34 @@ class CallNumberDataFix implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $tree               = Validator::attributes($request)->tree();
+		$user               = Validator::attributes($request)->user();
         $repository_xref    = Validator::attributes($request)->string(CallNumberCategory::VAR_XREF);
-
         $category_name      = Validator::queryParams($request)->string(CallNumberCategory::VAR_CATEGORY_NAME);
         $category_full_name = Validator::queryParams($request)->string(CallNumberCategory::VAR_CATEGORY_FULL_NAME);
 
-        $data_fixes = $this->module_service->findByInterface(ModuleDataFixInterface::class);
-        $data_fix = RepositoryHierarchy::activeModuleName();
-        $module = $data_fixes->get($data_fix);
-        $module->setDataFixParams($tree, $repository_xref, $category_name, $category_full_name);
+		//If user does not have access
+        if (Auth::accessLevel($tree, $user) === Auth::PRIV_PRIVATE) {
+            return response();
+		}
+		
+        /** @var RepositoryHierarchy $repository_hierarchy To avoid IDE warnings */
+        $repository_hierarchy = $this->module_service->findByName(RepositoryHierarchy::activeModuleName());
+        $repository_hierarchy->setDataFixParams($tree, $repository_xref, $category_name, $category_full_name);
 
         $this->layout = 'layouts/administration';
 
-        if ($module instanceof ModuleDataFixInterface) {
-            $title       = $module->title() . ' — ' . e($tree->title());
-            $page_url    = route(self::class, ['data_fix' => $data_fix, 'tree' => $tree->name()]);
-            $pending_url = route(PendingChanges::class, ['tree' => $tree->name(), 'url' => $page_url]);
-
-            return $this->viewResponse(
-                'admin/data-fix-page',
-                [
-                    RepositoryHierarchy::VAR_DATA_FIX               => $module,
-                    RepositoryHierarchy::VAR_DATA_FIX_TITLE         => $title,
-                    CallNumberCategory::VAR_TREE                    => $tree,
-                    RepositoryHierarchy::VAR_DATA_FIX_PENDING_URL   => $pending_url,
-                ]
-            );
-        }
-
-        //Default: continue with general data fix selection
-        $title = MoreI18N::xlate('Data fixes') . ' — ' . e($tree->title());
-        $data_fixes = $this->module_service->findByInterface(ModuleDataFixInterface::class, false, true);
+        $title       = $repository_hierarchy->title() . ' — ' . e($tree->title());
+        $data_fix    = RepositoryHierarchy::activeModuleName();
+        $page_url    = route(self::class, ['data_fix' => $data_fix, 'tree' => $tree->name()]);
+        $pending_url = route(PendingChanges::class, ['tree' => $tree->name(), 'url' => $page_url]);
 
         return $this->viewResponse(
-            'admin/data-fix-select',
+            'admin/data-fix-page',
             [
-                RepositoryHierarchy::VAR_DATA_FIX_TITLE => $title,
-                RepositoryHierarchy::VAR_DATA_FIXES     => $data_fixes,
-                CallNumberCategory::VAR_TREE            => $tree,
+                RepositoryHierarchy::VAR_DATA_FIX               => $repository_hierarchy,
+                RepositoryHierarchy::VAR_DATA_FIX_TITLE         => $title,
+                CallNumberCategory::VAR_TREE                    => $tree,
+                RepositoryHierarchy::VAR_DATA_FIX_PENDING_URL   => $pending_url,
             ]
         );
     }
