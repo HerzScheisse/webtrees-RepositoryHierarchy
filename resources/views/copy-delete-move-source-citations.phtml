@@ -25,6 +25,11 @@ $linked_record_service = new LinkedRecordService();
 $individual_facts_service = new IndividualFactsService($linked_record_service, $module_service);
 $can_edit = false;
 
+$showCopySourceCitationIcon = false;
+$facts = [];
+$xref = '';
+$xref_type = '';
+
 //Check if individual or family view and wether editable
 //Decide whether to show copy source citation icon
 
@@ -32,31 +37,29 @@ if ((Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE
 	&& (Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_TREE) === $tree->name())
 	&& Session::has($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_PARAMETER)) 
 {
-    $individual  = Registry::individualFactory()->make(Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_PARAMETER), $tree);
-    $can_edit = $individual->canEdit();
-    $showCopySourceCitationIcon = $can_edit && boolval($repository_hierarchy->getPreference(RepositoryHierarchy::PREF_ENABLE_COPY_PASTE_CITATIONS, '0'));
-    $xref = $individual->xref();
-    $facts = $individual->facts();
-    $family_facts = $individual_facts_service->familyFacts($individual, new Collection);
-    $facts = $facts->merge($family_facts);
-    $xref_type = 'INDI';
+    $individual = Registry::individualFactory()->make(Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_PARAMETER), $tree);
+    if ($individual !== null) {
+        $can_edit = $individual->canEdit();
+        $showCopySourceCitationIcon = $can_edit && boolval($repository_hierarchy->getPreference(RepositoryHierarchy::PREF_ENABLE_COPY_PASTE_CITATIONS, '0'));
+        $xref = $individual->xref();
+        $facts = $individual->facts();
+        $family_facts = $individual_facts_service->familyFacts($individual, new Collection);
+        $facts = $facts->merge($family_facts);
+        $xref_type = 'INDI';
+    }
 }
 elseif ((Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_NAME) === RepositoryHierarchy::PAGE_NAME_FAMILY) 
     && (Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_TREE) === $tree->name()) 
     && Session::has($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_PARAMETER))
 {
     $family  = Registry::familyFactory()->make(Session::get($repository_hierarchy->name() . RepositoryHierarchy::LAST_PAGE_PARAMETER), $tree);
-    $can_edit = $family->canEdit();
-    $showCopySourceCitationIcon = $can_edit && boolval($repository_hierarchy->getPreference(RepositoryHierarchy::PREF_ENABLE_COPY_PASTE_CITATIONS, '0'));
-    $xref = $family->xref();
-    $facts = $family->facts();
-    $xref_type = 'FAM';
-}
-else {
-    $showCopySourceCitationIcon = false;
-    $facts = [];
-    $xref = '';
-    $xref_type = '';
+    if ($family !== null) {
+        $can_edit = $family !== null && $family->canEdit();
+        $showCopySourceCitationIcon = $can_edit && boolval($repository_hierarchy->getPreference(RepositoryHierarchy::PREF_ENABLE_COPY_PASTE_CITATIONS, '0'));
+        $xref = $family->xref();
+        $facts = $family->facts();
+        $xref_type = 'FAM';
+    }
 }
 
 //Check that count of occurances in facts is only one
