@@ -96,12 +96,12 @@ This README file contains the following main sections:What](
 + Sort and delete source citations within facts/events by clicking icons in the user frontend
 
 ##  Installation
++ Install and use [Custom Module Manager](https://github.com/Jefferson49/CustomModuleManager) for an easy and convenient installation of webtrees custom modules.
++ Open the Custom Module Manager view in webtrees, scroll to "RepositoryHierarchy", and click on the "Install Module" button.
+
+**Manual installation**:
 + Download the [latest release](https://github.com/Jefferson49/RepositoryHierarchy/releases/latest) of the module by downloading the "**repository_hierarchy_v\*.zip**" file from "Assets". Do not download "Source code.zip".
-+ Unzip the downloaded file and copy the included folder "repository_hierarchy" into the "module_v4" folder of your webtrees installation
-+ Check if the module is activated in the control panel:
-    + Login to webtrees as an administrator
-	+ Go to "Control Panel/All Modules", and find the module called "Repository Hierarchy" (or corresponding translation)
-	+ Check if it has a tick for "Enabled"
++ Unzip the downloaded file and copy the included folder "repository_hierarchy" into the "module_v4" folder of your webtrees installation.
 + If the feature ["copy-paste mechanism for source citations in the individual and family view"](#copy-paste-mechanism-for-source-citations-in-the-individual-and-family-view) shall be used in paralell with the [vesta custom modules](https://github.com/vesta-webtrees-2-custom-modules), a **vesta version 2.1.18.2.1 or later** needs to be installed. To use the paste mechanism within the names view, a specific setting in the control panel of "Vesta Classic Look & Feel" has to be selected: "Use compact layout except for names".
 + If Repository Hierarchy is used, **it is strongly recommended to deactivate the [**webtrees-simple-media-display**](https://github.com/JustCarmen/webtrees-simple-media-display) (control panel: "Media Display as in webtrees 2.0")**, because parallel activation can lead to unintended behavior. The identical functionality of the Simple Media Display module - even the same code - is also integrated in the Repository Hierarchy module.
 
